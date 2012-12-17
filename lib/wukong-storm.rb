@@ -1,3 +1,3 @@
-require 'configliere'
-
-require 'wukong-storm/configuration'
+require 'wukong'
+require 'wukong-storm/runner'
+#  require 'wukong-storm/configuration'
