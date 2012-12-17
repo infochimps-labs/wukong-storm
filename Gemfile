@@ -1,3 +1,8 @@
 source :rubygems
 
-gem 'configliere', '~> 0.4'
+gemspec
+
+group :development do
+  gem 'rake',  '~> 0.9'
+  gem 'rspec', '~> 2'
+end
