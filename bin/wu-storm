@@ -23,7 +23,8 @@ If there are multiple messages that have resulted from a single event, wu-storm 
 them newline separated, followed by the delimite, e.g. 'foo\nbar\nbaz|'.
 EOF
 
-Settings.resolve!
+require 'wukong/boot'
+Wukong.boot!(Settings)
 
 runnable = Settings.rest.first
 
