@@ -16,7 +16,7 @@ module Wukong
     end
 
     def post_init
-      setup_dataflow      
+      setup_dataflow
     end
 
     def receive_line line
@@ -28,7 +28,12 @@ module Wukong
     end
 
     def send_messages
-      $stdout.write(@messages.join("\n") + settings.delimiter)
+      @messages.each do |msg|
+        $stdout.write(msg)
+        $stdout.write("\n")
+      end
+      $stdout.write(settings.delimiter)
+      $stdout.write("\n")
       $stdout.flush
       @messages.clear
     end
