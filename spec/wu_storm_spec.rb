@@ -14,7 +14,7 @@ describe 'wu-storm' do
   context 'without any arguments' do    
     subject      { command 'wu-storm'                                     }
     it           { should exit_with(:non_zero)                            }
-    it           { should have_stderr('usage: wu-storm')                  }
+    it           { should have_stderr('provide a processor to run')       }
   end
 
   context 'with a simple processor' do

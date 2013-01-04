@@ -1,326 +1,321 @@
-module Wukong
-  module Storm
+/**
+   This file contains a bunch Storm settings ripped from the Storm
+   Java code.  Some of these might need wrapped at the Ruby layer by
+   this plugin for added configurability.  Others may not.
+*/
 
-    Configuration = Configliere::Param.new unless defined? Configuration
 
-    Configuration.define :zookeepers_servers, description: 'storm.zookeeper.servers'
-    Configuration.define :zookeepers_port,    description: 'storm.zookeeper.port'
-    Configuration.define :local_dir,          description: 'storm.local.dir'
-    Configuration.define :scheduler,          description: 'storm.scheduler'
-    Configuration.define :cluster_mode,       description: 'storm.cluster.mode'
-    Configuration.define :local_hostname,     description: 'storm.local.hostname'
+/**
+ * Whether or not to use ZeroMQ for messaging in local mode. If this is set 
+ * to false, then Storm will use a pure-Java messaging system. The purpose 
+ * of this flag is to make it easy to run Storm in local mode by eliminating 
+ * the need for native dependencies, which can be difficult to install.
+ *
+ * Defaults to false.
+ */
+public static String STORM_LOCAL_MODE_ZMQ = "storm.local.mode.zmq";
 
-    /**
-     * Whether or not to use ZeroMQ for messaging in local mode. If this is set 
-     * to false, then Storm will use a pure-Java messaging system. The purpose 
-     * of this flag is to make it easy to run Storm in local mode by eliminating 
-     * the need for native dependencies, which can be difficult to install.
-     *
-     * Defaults to false.
-     */
-    public static String STORM_LOCAL_MODE_ZMQ = "storm.local.mode.zmq";
+/**
+ * The root location at which Storm stores data in ZooKeeper.
+ */
+public static String STORM_ZOOKEEPER_ROOT = "storm.zookeeper.root";
 
-    /**
-     * The root location at which Storm stores data in ZooKeeper.
-     */
-    public static String STORM_ZOOKEEPER_ROOT = "storm.zookeeper.root";
+/**
+ * The session timeout for clients to ZooKeeper.
+ */
+public static String STORM_ZOOKEEPER_SESSION_TIMEOUT = "storm.zookeeper.session.timeout";
 
-    /**
-     * The session timeout for clients to ZooKeeper.
-     */
-    public static String STORM_ZOOKEEPER_SESSION_TIMEOUT = "storm.zookeeper.session.timeout";
-
-    /**
-     * The connection timeout for clients to ZooKeeper.
-     */
-    public static String STORM_ZOOKEEPER_CONNECTION_TIMEOUT = "storm.zookeeper.connection.timeout";
+/**
+ * The connection timeout for clients to ZooKeeper.
+ */
+public static String STORM_ZOOKEEPER_CONNECTION_TIMEOUT = "storm.zookeeper.connection.timeout";
     
     
-    /**
-     * The number of times to retry a Zookeeper operation.
-     */
-    public static String STORM_ZOOKEEPER_RETRY_TIMES="storm.zookeeper.retry.times";
+/**
+ * The number of times to retry a Zookeeper operation.
+ */
+public static String STORM_ZOOKEEPER_RETRY_TIMES="storm.zookeeper.retry.times";
     
-    /**
-     * The interval between retries of a Zookeeper operation.
-     */
-    public static String STORM_ZOOKEEPER_RETRY_INTERVAL="storm.zookeeper.retry.interval";
+/**
+ * The interval between retries of a Zookeeper operation.
+ */
+public static String STORM_ZOOKEEPER_RETRY_INTERVAL="storm.zookeeper.retry.interval";
 
-    /**
-     * The Zookeeper authentication scheme to use, e.g. "digest". Defaults to no authentication.
-     */
-    public static String STORM_ZOOKEEPER_AUTH_SCHEME="storm.zookeeper.auth.scheme";
+/**
+ * The Zookeeper authentication scheme to use, e.g. "digest". Defaults to no authentication.
+ */
+public static String STORM_ZOOKEEPER_AUTH_SCHEME="storm.zookeeper.auth.scheme";
     
-    /**
-     * A string representing the payload for Zookeeper authentication. It gets serialized using UTF-8 encoding during authentication.
-     */
-    public static String STORM_ZOOKEEPER_AUTH_PAYLOAD="storm.zookeeper.auth.payload";
+/**
+ * A string representing the payload for Zookeeper authentication. It gets serialized using UTF-8 encoding during authentication.
+ */
+public static String STORM_ZOOKEEPER_AUTH_PAYLOAD="storm.zookeeper.auth.payload";
     
-    /**
-     * The id assigned to a running topology. The id is the storm name with a unique nonce appended.
-     */
-    public static String STORM_ID = "storm.id";
+/**
+ * The id assigned to a running topology. The id is the storm name with a unique nonce appended.
+ */
+public static String STORM_ID = "storm.id";
     
-    /**
-     * The host that the master server is running on.
-     */
-    public static String NIMBUS_HOST = "nimbus.host";
+/**
+ * The host that the master server is running on.
+ */
+public static String NIMBUS_HOST = "nimbus.host";
 
-    /**
-     * Which port the Thrift interface of Nimbus should run on. Clients should
-     * connect to this port to upload jars and submit topologies.
-     */
-    public static String NIMBUS_THRIFT_PORT = "nimbus.thrift.port";
-
-
-    /**
-     * This parameter is used by the storm-deploy project to configure the
-     * jvm options for the nimbus daemon.
-     */
-    public static String NIMBUS_CHILDOPTS = "nimbus.childopts";
+/**
+ * Which port the Thrift interface of Nimbus should run on. Clients should
+ * connect to this port to upload jars and submit topologies.
+ */
+public static String NIMBUS_THRIFT_PORT = "nimbus.thrift.port";
 
 
-    /**
-     * How long without heartbeating a task can go before nimbus will consider the
-     * task dead and reassign it to another location.
-     */
-    public static String NIMBUS_TASK_TIMEOUT_SECS = "nimbus.task.timeout.secs";
+/**
+ * This parameter is used by the storm-deploy project to configure the
+ * jvm options for the nimbus daemon.
+ */
+public static String NIMBUS_CHILDOPTS = "nimbus.childopts";
 
 
-    /**
-     * How often nimbus should wake up to check heartbeats and do reassignments. Note
-     * that if a machine ever goes down Nimbus will immediately wake up and take action.
-     * This parameter is for checking for failures when there's no explicit event like that
-     * occuring.
-     */
-    public static String NIMBUS_MONITOR_FREQ_SECS = "nimbus.monitor.freq.secs";
+/**
+ * How long without heartbeating a task can go before nimbus will consider the
+ * task dead and reassign it to another location.
+ */
+public static String NIMBUS_TASK_TIMEOUT_SECS = "nimbus.task.timeout.secs";
 
-    /**
-     * How often nimbus should wake the cleanup thread to clean the inbox.
-     * @see NIMBUS_INBOX_JAR_EXPIRATION_SECS
-     */
-    public static String NIMBUS_CLEANUP_INBOX_FREQ_SECS = "nimbus.cleanup.inbox.freq.secs";
 
-    /**
-     * The length of time a jar file lives in the inbox before being deleted by the cleanup thread.
-     *
-     * Probably keep this value greater than or equal to NIMBUS_CLEANUP_INBOX_JAR_EXPIRATION_SECS.
-     * Note that the time it takes to delete an inbox jar file is going to be somewhat more than
-     * NIMBUS_CLEANUP_INBOX_JAR_EXPIRATION_SECS (depending on how often NIMBUS_CLEANUP_FREQ_SECS
-     * is set to).
-     * @see NIMBUS_CLEANUP_FREQ_SECS
-     */
-    public static String NIMBUS_INBOX_JAR_EXPIRATION_SECS = "nimbus.inbox.jar.expiration.secs";
+/**
+ * How often nimbus should wake up to check heartbeats and do reassignments. Note
+ * that if a machine ever goes down Nimbus will immediately wake up and take action.
+ * This parameter is for checking for failures when there's no explicit event like that
+ * occuring.
+ */
+public static String NIMBUS_MONITOR_FREQ_SECS = "nimbus.monitor.freq.secs";
 
-    /**
-     * How long before a supervisor can go without heartbeating before nimbus considers it dead
-     * and stops assigning new work to it.
-     */
-    public static String NIMBUS_SUPERVISOR_TIMEOUT_SECS = "nimbus.supervisor.timeout.secs";
+/**
+ * How often nimbus should wake the cleanup thread to clean the inbox.
+ * @see NIMBUS_INBOX_JAR_EXPIRATION_SECS
+ */
+public static String NIMBUS_CLEANUP_INBOX_FREQ_SECS = "nimbus.cleanup.inbox.freq.secs";
 
-    /**
-     * A special timeout used when a task is initially launched. During launch, this is the timeout
-     * used until the first heartbeat, overriding nimbus.task.timeout.secs.
-     *
-     * <p>A separate timeout exists for launch because there can be quite a bit of overhead
-     * to launching new JVM's and configuring them.</p>
-     */
-    public static String NIMBUS_TASK_LAUNCH_SECS = "nimbus.task.launch.secs";
+/**
+ * The length of time a jar file lives in the inbox before being deleted by the cleanup thread.
+ *
+ * Probably keep this value greater than or equal to NIMBUS_CLEANUP_INBOX_JAR_EXPIRATION_SECS.
+ * Note that the time it takes to delete an inbox jar file is going to be somewhat more than
+ * NIMBUS_CLEANUP_INBOX_JAR_EXPIRATION_SECS (depending on how often NIMBUS_CLEANUP_FREQ_SECS
+ * is set to).
+ * @see NIMBUS_CLEANUP_FREQ_SECS
+ */
+public static String NIMBUS_INBOX_JAR_EXPIRATION_SECS = "nimbus.inbox.jar.expiration.secs";
 
-    /**
-     * Whether or not nimbus should reassign tasks if it detects that a task goes down. 
-     * Defaults to true, and it's not recommended to change this value.
-     */
-    public static String NIMBUS_REASSIGN = "nimbus.reassign";
+/**
+ * How long before a supervisor can go without heartbeating before nimbus considers it dead
+ * and stops assigning new work to it.
+ */
+public static String NIMBUS_SUPERVISOR_TIMEOUT_SECS = "nimbus.supervisor.timeout.secs";
 
-    /**
-     * During upload/download with the master, how long an upload or download connection is idle
-     * before nimbus considers it dead and drops the connection.
-     */
-    public static String NIMBUS_FILE_COPY_EXPIRATION_SECS = "nimbus.file.copy.expiration.secs";
+/**
+ * A special timeout used when a task is initially launched. During launch, this is the timeout
+ * used until the first heartbeat, overriding nimbus.task.timeout.secs.
+ *
+ * <p>A separate timeout exists for launch because there can be quite a bit of overhead
+ * to launching new JVM's and configuring them.</p>
+ */
+public static String NIMBUS_TASK_LAUNCH_SECS = "nimbus.task.launch.secs";
 
-    /**
-     * A custom class that implements ITopologyValidator that is run whenever a
-     * topology is submitted. Can be used to provide business-specific logic for
-     * whether topologies are allowed to run or not.
-     */
-    public static String NIMBUS_TOPOLOGY_VALIDATOR = "nimbus.topology.validator";
-    
-    
-    /**
-     * Storm UI binds to this port.
-     */
-    public static String UI_PORT = "ui.port";
+/**
+ * Whether or not nimbus should reassign tasks if it detects that a task goes down. 
+ * Defaults to true, and it's not recommended to change this value.
+ */
+public static String NIMBUS_REASSIGN = "nimbus.reassign";
 
-    /**
-     * Childopts for Storm UI Java process.
-     */
-    public static String UI_CHILDOPTS = "ui.childopts";
+/**
+ * During upload/download with the master, how long an upload or download connection is idle
+ * before nimbus considers it dead and drops the connection.
+ */
+public static String NIMBUS_FILE_COPY_EXPIRATION_SECS = "nimbus.file.copy.expiration.secs";
+
+/**
+ * A custom class that implements ITopologyValidator that is run whenever a
+ * topology is submitted. Can be used to provide business-specific logic for
+ * whether topologies are allowed to run or not.
+ */
+public static String NIMBUS_TOPOLOGY_VALIDATOR = "nimbus.topology.validator";
     
     
-    /**
-     * List of DRPC servers so that the DRPCSpout knows who to talk to.
-     */
-    public static String DRPC_SERVERS = "drpc.servers";
+/**
+ * Storm UI binds to this port.
+ */
+public static String UI_PORT = "ui.port";
 
-    /**
-     * This port is used by Storm DRPC for receiving DPRC requests from clients.
-     */
-    public static String DRPC_PORT = "drpc.port";
+/**
+ * Childopts for Storm UI Java process.
+ */
+public static String UI_CHILDOPTS = "ui.childopts";
     
-    /**
-     * This port on Storm DRPC is used by DRPC topologies to receive function invocations and send results back. 
-     */
-    public static String DRPC_INVOCATIONS_PORT = "drpc.invocations.port";  
     
-    /**
-     * The timeout on DRPC requests within the DRPC server. Defaults to 10 minutes. Note that requests can also
-     * timeout based on the socket timeout on the DRPC client, and separately based on the topology message
-     * timeout for the topology implementing the DRPC function.
-     */
-    public static String DRPC_REQUEST_TIMEOUT_SECS  = "drpc.request.timeout.secs";  
+/**
+ * List of DRPC servers so that the DRPCSpout knows who to talk to.
+ */
+public static String DRPC_SERVERS = "drpc.servers";
+
+/**
+ * This port is used by Storm DRPC for receiving DPRC requests from clients.
+ */
+public static String DRPC_PORT = "drpc.port";
     
-    /**
-     * the metadata configed on the supervisor
-     */    
-    public static String SUPERVISOR_SCHEDULER_META = "supervisor.scheduler.meta";
-    /**
-     * A list of ports that can run workers on this supervisor. Each worker uses one port, and
-     * the supervisor will only run one worker per port. Use this configuration to tune
-     * how many workers run on each machine.
-     */
-    public static String SUPERVISOR_SLOTS_PORTS = "supervisor.slots.ports";
-
-
-
-    /**
-     * This parameter is used by the storm-deploy project to configure the
-     * jvm options for the supervisor daemon.
-     */
-    public static String SUPERVISOR_CHILDOPTS = "supervisor.childopts";
-
-
-    /**
-     * How long a worker can go without heartbeating before the supervisor tries to
-     * restart the worker process.
-     */
-    public static String SUPERVISOR_WORKER_TIMEOUT_SECS = "supervisor.worker.timeout.secs";
-
-
-    /**
-     * How long a worker can go without heartbeating during the initial launch before
-     * the supervisor tries to restart the worker process. This value override
-     * supervisor.worker.timeout.secs during launch because there is additional
-     * overhead to starting and configuring the JVM on launch.
-     */
-    public static String SUPERVISOR_WORKER_START_TIMEOUT_SECS = "supervisor.worker.start.timeout.secs";
-
-
-    /**
-     * Whether or not the supervisor should launch workers assigned to it. Defaults
-     * to true -- and you should probably never change this value. This configuration
-     * is used in the Storm unit tests.
-     */
-    public static String SUPERVISOR_ENABLE = "supervisor.enable";
-
-
-    /**
-     * how often the supervisor sends a heartbeat to the master.
-     */
-    public static String SUPERVISOR_HEARTBEAT_FREQUENCY_SECS = "supervisor.heartbeat.frequency.secs";
-
-
-    /**
-     * How often the supervisor checks the worker heartbeats to see if any of them
-     * need to be restarted.
-     */
-    public static String SUPERVISOR_MONITOR_FREQUENCY_SECS = "supervisor.monitor.frequency.secs";
+/**
+ * This port on Storm DRPC is used by DRPC topologies to receive function invocations and send results back. 
+ */
+public static String DRPC_INVOCATIONS_PORT = "drpc.invocations.port";  
     
-    /**
-     * The jvm opts provided to workers launched by this supervisor. All "%ID%" substrings are replaced
-     * with an identifier for this worker.
-     */
-    public static String WORKER_CHILDOPTS = "worker.childopts";
+/**
+ * The timeout on DRPC requests within the DRPC server. Defaults to 10 minutes. Note that requests can also
+ * timeout based on the socket timeout on the DRPC client, and separately based on the topology message
+ * timeout for the topology implementing the DRPC function.
+ */
+public static String DRPC_REQUEST_TIMEOUT_SECS  = "drpc.request.timeout.secs";  
+    
+/**
+ * the metadata configed on the supervisor
+ */    
+public static String SUPERVISOR_SCHEDULER_META = "supervisor.scheduler.meta";
+/**
+ * A list of ports that can run workers on this supervisor. Each worker uses one port, and
+ * the supervisor will only run one worker per port. Use this configuration to tune
+ * how many workers run on each machine.
+ */
+public static String SUPERVISOR_SLOTS_PORTS = "supervisor.slots.ports";
 
 
-    /**
-     * How often this worker should heartbeat to the supervisor.
-     */
-    public static String WORKER_HEARTBEAT_FREQUENCY_SECS = "worker.heartbeat.frequency.secs";
 
-    /**
-     * How often a task should heartbeat its status to the master.
-     */
-    public static String TASK_HEARTBEAT_FREQUENCY_SECS = "task.heartbeat.frequency.secs";
+/**
+ * This parameter is used by the storm-deploy project to configure the
+ * jvm options for the supervisor daemon.
+ */
+public static String SUPERVISOR_CHILDOPTS = "supervisor.childopts";
 
 
-    /**
-     * How often a task should sync its connections with other tasks (if a task is
-     * reassigned, the other tasks sending messages to it need to refresh their connections).
-     * In general though, when a reassignment happens other tasks will be notified
-     * almost immediately. This configuration is here just in case that notification doesn't
-     * come through.
-     */
-    public static String TASK_REFRESH_POLL_SECS = "task.refresh.poll.secs";
+/**
+ * How long a worker can go without heartbeating before the supervisor tries to
+ * restart the worker process.
+ */
+public static String SUPERVISOR_WORKER_TIMEOUT_SECS = "supervisor.worker.timeout.secs";
+
+
+/**
+ * How long a worker can go without heartbeating during the initial launch before
+ * the supervisor tries to restart the worker process. This value override
+ * supervisor.worker.timeout.secs during launch because there is additional
+ * overhead to starting and configuring the JVM on launch.
+ */
+public static String SUPERVISOR_WORKER_START_TIMEOUT_SECS = "supervisor.worker.start.timeout.secs";
+
+
+/**
+ * Whether or not the supervisor should launch workers assigned to it. Defaults
+ * to true -- and you should probably never change this value. This configuration
+ * is used in the Storm unit tests.
+ */
+public static String SUPERVISOR_ENABLE = "supervisor.enable";
+
+
+/**
+ * how often the supervisor sends a heartbeat to the master.
+ */
+public static String SUPERVISOR_HEARTBEAT_FREQUENCY_SECS = "supervisor.heartbeat.frequency.secs";
+
+
+/**
+ * How often the supervisor checks the worker heartbeats to see if any of them
+ * need to be restarted.
+ */
+public static String SUPERVISOR_MONITOR_FREQUENCY_SECS = "supervisor.monitor.frequency.secs";
+    
+/**
+ * The jvm opts provided to workers launched by this supervisor. All "%ID%" substrings are replaced
+ * with an identifier for this worker.
+ */
+public static String WORKER_CHILDOPTS = "worker.childopts";
+
+
+/**
+ * How often this worker should heartbeat to the supervisor.
+ */
+public static String WORKER_HEARTBEAT_FREQUENCY_SECS = "worker.heartbeat.frequency.secs";
+
+/**
+ * How often a task should heartbeat its status to the master.
+ */
+public static String TASK_HEARTBEAT_FREQUENCY_SECS = "task.heartbeat.frequency.secs";
+
+
+/**
+ * How often a task should sync its connections with other tasks (if a task is
+ * reassigned, the other tasks sending messages to it need to refresh their connections).
+ * In general though, when a reassignment happens other tasks will be notified
+ * almost immediately. This configuration is here just in case that notification doesn't
+ * come through.
+ */
+public static String TASK_REFRESH_POLL_SECS = "task.refresh.poll.secs";
 
     
     
-    /**
-     * True if Storm should timeout messages or not. Defaults to true. This is meant to be used
-     * in unit tests to prevent tuples from being accidentally timed out during the test.
-     */
-    public static String TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS = "topology.enable.message.timeouts";
+/**
+ * True if Storm should timeout messages or not. Defaults to true. This is meant to be used
+ * in unit tests to prevent tuples from being accidentally timed out during the test.
+ */
+public static String TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS = "topology.enable.message.timeouts";
     
-    /**
-     * When set to true, Storm will log every message that's emitted.
-     */
-    public static String TOPOLOGY_DEBUG = "topology.debug";
+/**
+ * When set to true, Storm will log every message that's emitted.
+ */
+public static String TOPOLOGY_DEBUG = "topology.debug";
 
 
-    /**
-     * Whether or not the master should optimize topologies by running multiple
-     * tasks in a single thread where appropriate.
-     */
-    public static String TOPOLOGY_OPTIMIZE = "topology.optimize";
+/**
+ * Whether or not the master should optimize topologies by running multiple
+ * tasks in a single thread where appropriate.
+ */
+public static String TOPOLOGY_OPTIMIZE = "topology.optimize";
 
-    /**
-     * How many processes should be spawned around the cluster to execute this
-     * topology. Each process will execute some number of tasks as threads within
-     * them. This parameter should be used in conjunction with the parallelism hints
-     * on each component in the topology to tune the performance of a topology.
-     */
-    public static String TOPOLOGY_WORKERS = "topology.workers";
+/**
+ * How many processes should be spawned around the cluster to execute this
+ * topology. Each process will execute some number of tasks as threads within
+ * them. This parameter should be used in conjunction with the parallelism hints
+ * on each component in the topology to tune the performance of a topology.
+ */
+public static String TOPOLOGY_WORKERS = "topology.workers";
 
-    /**
-     * How many instances to create for a spout/bolt. A task runs on a thread with zero or more
-     * other tasks for the same spout/bolt. The number of tasks for a spout/bolt is always
-     * the same throughout the lifetime of a topology, but the number of executors (threads) for 
-     * a spout/bolt can change over time. This allows a topology to scale to more or less resources 
-     * without redeploying the topology or violating the constraints of Storm (such as a fields grouping
-     * guaranteeing that the same value goes to the same task).
-     */
-    public static String TOPOLOGY_TASKS = "topology.tasks";
+/**
+ * How many instances to create for a spout/bolt. A task runs on a thread with zero or more
+ * other tasks for the same spout/bolt. The number of tasks for a spout/bolt is always
+ * the same throughout the lifetime of a topology, but the number of executors (threads) for 
+ * a spout/bolt can change over time. This allows a topology to scale to more or less resources 
+ * without redeploying the topology or violating the constraints of Storm (such as a fields grouping
+ * guaranteeing that the same value goes to the same task).
+ */
+public static String TOPOLOGY_TASKS = "topology.tasks";
 
-    /**
-     * How many executors to spawn for ackers.
-     *
-     * <p>If this is set to 0, then Storm will immediately ack tuples as soon
-     * as they come off the spout, effectively disabling reliability.</p>
-     */
-    public static String TOPOLOGY_ACKER_EXECUTORS = "topology.acker.executors";
+/**
+ * How many executors to spawn for ackers.
+ *
+ * <p>If this is set to 0, then Storm will immediately ack tuples as soon
+ * as they come off the spout, effectively disabling reliability.</p>
+ */
+public static String TOPOLOGY_ACKER_EXECUTORS = "topology.acker.executors";
 
 
-    /**
-     * The maximum amount of time given to the topology to fully process a message
-     * emitted by a spout. If the message is not acked within this time frame, Storm
-     * will fail the message on the spout. Some spouts implementations will then replay
-     * the message at a later time.
-     */
-    public static String TOPOLOGY_MESSAGE_TIMEOUT_SECS = "topology.message.timeout.secs";
+/**
+ * The maximum amount of time given to the topology to fully process a message
+ * emitted by a spout. If the message is not acked within this time frame, Storm
+ * will fail the message on the spout. Some spouts implementations will then replay
+ * the message at a later time.
+ */
+public static String TOPOLOGY_MESSAGE_TIMEOUT_SECS = "topology.message.timeout.secs";
 
-    /**
-     * A list of serialization registrations for Kryo ( http://code.google.com/p/kryo/ ),
-     * the underlying serialization framework for Storm. A serialization can either
+/**
+ * A list of serialization registrations for Kryo ( http://code.google.com/p/kryo/ ),
+ * the underlying serialization framework for Storm. A serialization can either
      * be the name of a class (in which case Kryo will automatically create a serializer for the class
      * that saves all the object's fields), or an implementation of com.esotericsoftware.kryo.Serializer.
      *
@@ -670,7 +665,3 @@ module Wukong
         return ret;
     }
 }
-
-
-  end
-end
