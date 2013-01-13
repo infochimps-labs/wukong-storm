@@ -20,7 +20,7 @@ module Wukong
       settings.define :cluster_mode,       description: 'storm.cluster.mode'
       settings.define :local_hostname,     description: 'storm.local.hostname'
       settings.define :run,                description: 'Name of the processor or dataflow to use. Defaults to basename of the given path', flag: 'r'
-      settings.define :delimiter,          description: 'The EOF specifier when returning events', default: '|',                            flag: 't'
+      settings.define :delimiter,          description: 'Emitted as a single record to mark the end of the batch ', default: '---', flag: 't'
     end
 
     # Boots the Wukong::Storm plugin.

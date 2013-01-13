@@ -33,7 +33,14 @@ module Wukong
       end
 
       def send_messages
-        $stdout.write(@messages.join("\n") + settings.delimiter)
+        # message newline message newline message delimiter
+        # message newline message newline message newline delimiter newline
+        @messages.each do |message|
+          $stdout.write(message)
+          $stdout.write("\n")
+        end
+        $stdout.write(settings.delimiter)
+        $stdout.write("\n")
         $stdout.flush
         @messages.clear
       end

@@ -21,34 +21,34 @@ describe 'wu-storm' do
     let(:input)  { 'one event'                                            } 
     subject      { command('wu-storm', examples, '--run=simple') < input  }
     it           { should exit_with(0)                                    }
-    it           { should have_stdout('one event|')                       }
+    it           { should have_stdout("one event\n---\n")                 }
   end
 
   context 'with a skipped processor' do
     let(:input)  { 'never see this'                                       }
     subject      { command('wu-storm', examples, '--run=skipped') < input }
     it           { should exit_with(0)                                    }
-    it           { should have_stdout('|')                                }
+    it           { should have_stdout("---\n")                            }
   end
 
   context 'with a duplicating processor' do
     let(:input)  { 'foo'                                                  }
     subject      { command('wu-storm', examples, '--run=multi') < input   }
     it           { should exit_with(0)                                    }
-    it           { should have_stdout("foo\nfoo\nfoo|")                   }
+    it           { should have_stdout("foo\nfoo\nfoo\n---\n")             }
   end
 
   context 'with a flow' do
     let(:input)  { '{"foo":"bar"}'                                        }
     subject      { command('wu-storm', examples, '--run=flow') < input    }
     it           { should exit_with(0)                                    }
-    it           { should have_stdout('I raised the bar|')                }
+    it           { should have_stdout("I raised the bar\n---\n")          }
   end  
 
   context 'with multiple arguments' do
     let(:input)  { "foo\nbar\nbaz"                                        }
     subject      { command('wu-storm', examples, '--run=simple') < input  }
     it           { should exit_with(0)                                    }
-    it           { should have_stdout('foo|bar|baz|')                     }
+    it           { should have_stdout("foo\n---\nbar\n---\nbaz\n---\n")   }
   end  
 end
