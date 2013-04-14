@@ -12,15 +12,18 @@ module Wukong
     # @param [Configliere::Param] settings the settings to configure
     # @param [String] program the name of the currently executing program
     def self.configure settings, program
-      return unless program == 'wu-storm'
-      settings.define :zookeepers_servers, description: 'storm.zookeeper.servers'
-      settings.define :zookeepers_port,    description: 'storm.zookeeper.port'
-      settings.define :local_dir,          description: 'storm.local.dir'
-      settings.define :scheduler,          description: 'storm.scheduler'
-      settings.define :cluster_mode,       description: 'storm.cluster.mode'
-      settings.define :local_hostname,     description: 'storm.local.hostname'
-      settings.define :run,                description: 'Name of the processor or dataflow to use. Defaults to basename of the given path', flag: 'r'
-      settings.define :delimiter,          description: 'Emitted as a single record to mark the end of the batch ', default: '---', flag: 't'
+      case program
+      when 'wu-storm-bolt'
+        settings.define :run,                description: 'Name of the processor or dataflow to use. Defaults to basename of the given path', flag: 'r'
+        settings.define :delimiter,          description: 'Emitted as a single record to mark the end of the batch ', default: '---', flag: 't'
+      when 'wu-storm'
+        settings.define :zookeepers_servers, description: 'storm.zookeeper.servers'
+        settings.define :zookeepers_port,    description: 'storm.zookeeper.port'
+        settings.define :local_dir,          description: 'storm.local.dir'
+        settings.define :scheduler,          description: 'storm.scheduler'
+        settings.define :cluster_mode,       description: 'storm.cluster.mode'
+        settings.define :local_hostname,     description: 'storm.local.hostname'
+      end
     end
 
     # Boots the Wukong::Storm plugin.
@@ -33,4 +36,5 @@ module Wukong
   end
 end
 
-require 'wukong-storm/runner'
+require 'wukong-storm/storm_runner'
+require 'wukong-storm/bolt_runner'

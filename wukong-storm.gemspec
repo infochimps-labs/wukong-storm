@@ -14,7 +14,7 @@ Gem::Specification.new do |gem|
 EOF
 
   gem.files         = `git ls-files`.split("\n")
-  gem.executables   = ['wu-storm']
+  gem.executables   = ['wu-storm', 'wu-storm-bolt']
   gem.test_files    = gem.files.grep(/^spec/)
   gem.require_paths = ['lib']
 

@@ -1,23 +1,24 @@
-require_relative('driver')
+require_relative('bolt_driver')
 
 module Wukong
   module Storm
 
     # Implements the runner for wu-storm.
-    class StormRunner < Wukong::Local::LocalRunner
+    class StormBoltRunner < Wukong::Local::LocalRunner
 
       include Wukong::Logging
 
       usage "PROCESSOR|FLOW"
 
       description <<-EOF.gsub(/^ {8}/,'')
-        wu-storm is a commandline tool for running Wukong processors and flows
-        in a storm or trident topology.
+        wu-storm-bolt is a commandline tool for running Wukong
+        dataflows as bolts within a Storm topology.
 
-        wu-storm operates over STDIN and STDOUT and has a one-to-one message
-        guarantee.  For example, when using an identity processor, wu-storm,
-        given an event 'foo', will return 'foo|'. The '|' character is the
-        specified End-Of-File delimiter.
+        wu-storm-bolt operates over STDIN and STDOUT and has a
+        one-to-one message guarantee.  For example, when using an
+        identity processor, wu-storm, given an event 'foo', will
+        return 'foo|'. The '|' character is the specified End-Of-File
+        delimiter.
 
         If there is ever a suppressed error in pricessing, or a skipped record
         for any reason, wu-storm will still respond with a '|', signifying an
@@ -30,7 +31,7 @@ module Wukong
 
       # :nodoc:
       def driver
-        StormDriver
+        StormBoltDriver
       end
       
     end
