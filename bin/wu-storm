@@ -2,3 +2,46 @@
 
 require 'wukong-storm'
 Wukong::Storm::StormRunner.run
+
+storm jar /path/to/wukong-storm.jar com....DataflowSubmitter -D 'dataflow.name=my_dataflow' input_topic output_topic /path/to/settings.yml,/path/to/environment/settings.yml --some_wukong_arg=value --other_one
+
+# /usr/local/share/storm/bin/storm 	\
+#   jar /usr/lib/ruby/gems/.../wukong-storm/target/wukong-storm-1.0.0.jar 	\
+#   com.infochimps.wukong.storm.KWKSubmitter \
+
+#   -D dataflow.name=my_dataflow 	\
+#   -D dataflow.directory=/path/to/my/dir 	\
+#   -D dataflow.args="some --set of args" 	\
+#   -D dataflow.kafka.hosts=host1,host2 	\
+#   -D dataflow.zookeeper.hosts=host1,host2 	\
+
+#   -D dataflow.input.topic=the_input 	   \
+#   -D dataflow.input.offset=-2            \ is this really the right name?
+#   -D dataflow.input.batch_size=1047864   \
+#   -D dataflow.input.parallelism=4        \
+
+#   -D dataflow.output.topic=the_output    \
+#   -D dataflow.output.parallelism=4       \
+
+#   -D dataflow.processing.parallelism=16  \
+
+#   -D 
+#   -D 
+    public int socketTimeoutMs = 10000;
+    public int bufferSizeBytes = 1024*1024;
+    public Scheme scheme = new RawScheme();
+    public String topic;
+    public long startOffsetTime = -2;
+    public boolean forceFromStart = false;
+    public IBatchCoordinator coordinator = new DefaultCoordinator();
+
+#   -D dataflow.name=my_dataflow 	\
+#   -D dataflow.name=my_dataflow 	\
+#   -D dataflow.name=my_dataflow 	\
+
+#   -mapper       'wu-local identity' 	\
+#   -reducer      '' 	\
+#   -input        'from' 	\
+#   -output       'to' 	\
+#   -cmdenv       'BUNDLE_GEMFILE=/home/dhruv/projects/infochimps/wukong-hadoop/Gemfile' 	\
+#   -cmdenv       'LANG=en_US.UTF-8'
