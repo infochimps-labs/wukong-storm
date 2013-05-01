@@ -3,39 +3,42 @@ require_relative('bolt_driver')
 module Wukong
   module Storm
 
-    # Implements the runner for wu-storm.
+    # Implements the runner for wu-bolt.
     class StormBoltRunner < Wukong::Local::LocalRunner
 
-      include Wukong::Logging
+      include Logging
 
       usage "PROCESSOR|FLOW"
 
       description <<-EOF.gsub(/^ {8}/,'')
-        wu-storm-bolt is a commandline tool for running Wukong
-        dataflows as bolts within a Storm topology.
+        wu-bolt is a commandline tool for running Wukong dataflows as
+        bolts within a Storm topology.
 
-        wu-storm-bolt operates over STDIN and STDOUT and has a
-        one-to-one message guarantee.  For example, when using an
-        identity processor, wu-storm, given an event 'foo', will
-        return 'foo|'. The '|' character is the specified End-Of-File
-        delimiter.
+        wu-bolt behaves like wu-local except it adds a batch
+        terminator after the output generated from each input record.
+        This allows Storm to differentiate "no output" from "no output
+        yet", important for back-propagating acks.
 
-        If there is ever a suppressed error in pricessing, or a skipped record
-        for any reason, wu-storm will still respond with a '|', signifying an
-        empty return event.
+        For example
 
-        If there are multiple messages that have resulted from a single event,
-        wu-storm will return them newline separated, followed by the
-        delimiter, e.g. 'foo\nbar\nbaz|'.
+          $ echo "adds a terminator" | wu-bolt tokenizer.rb
+          adds
+          a
+          terminator
+          ---
+          $ echo "" | wu-bolt tokenizer.rb
+          ---
+
+        If there is ever a suppressed error in pricessing, or a
+        skipped record for any reason, wu-bolt will still output the
+        batch terminator.
       EOF
 
       # :nodoc:
       def driver
-        StormBoltDriver
+        BoltDriver
       end
       
     end
   end
 end
-
-  

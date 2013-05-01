@@ -9,16 +9,16 @@ import backtype.storm.StormSubmitter;
 import backtype.storm.generated.AlreadyAliveException;
 import backtype.storm.generated.InvalidTopologyException;
 
-import com.infochimps.wukong.storm.KWKTopologyBuilder;
+import com.infochimps.wukong.storm.WukongTopologyBuilder;
 
-public class KWKSubmitter {
+public class WukongTopologySubmitter {
 
-    private static Logger LOG = Logger.getLogger(KWKSubmitter.class);
-    private KWKTopologyBuilder builder;
+    private static Logger LOG = Logger.getLogger(WukongTopologySubmitter.class);
+    private WukongTopologyBuilder builder;
 
     public static void main(String[] args) throws Exception {
 	setPropertiesFromArgsBecauseStupidlyHard(args);
-	KWKSubmitter submitter = new KWKSubmitter();
+	WukongTopologySubmitter submitter = new WukongTopologySubmitter();
 	submitter.validate();
 	submitter.submit();
 	System.exit(0);
@@ -35,8 +35,8 @@ public class KWKSubmitter {
 	}
     }
 
-    public KWKSubmitter() {
-	this.builder = new KWKTopologyBuilder();
+    public WukongTopologySubmitter() {
+	this.builder = new WukongTopologyBuilder();
     }
 
     private void validate() {
@@ -47,11 +47,11 @@ public class KWKSubmitter {
     }
 
     private String usage() {
-	return "usage: storm jar " + fullyQualifiedClassPath() + " " + KWKTopologyBuilder.usageArgs();
+	return "usage: storm jar " + fullyQualifiedClassPath() + " " + WukongTopologyBuilder.usageArgs();
     }
     
     private File fullyQualifiedClassPath() {
-	return new File(KWKSubmitter.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+	return new File(WukongTopologySubmitter.class.getProtectionDomain().getCodeSource().getLocation().getPath());
     }
     
     private Config config() {
@@ -60,15 +60,13 @@ public class KWKSubmitter {
 
     private void submit() {
 	try {
-	    StormSubmitter.submitTopology(builder.dataflowName(), config(), builder.topology());
+	    StormSubmitter.submitTopology(builder.topologyName(), config(), builder.topology());
 	} catch (AlreadyAliveException e) {
-	    LOG.error("Topology " + builder.dataflowName() + " is already running", e);
+	    LOG.error("Topology " + builder.topologyName() + " is already running", e);
 	    System.exit(2);
 	} catch (InvalidTopologyException e) {
-	    LOG.error("Topology " + builder.dataflowName() + " is invalid", e);
+	    LOG.error("Topology " + builder.topologyName() + " is invalid", e);
 	    System.exit(3);
 	}
     }
-	    
-    
 }

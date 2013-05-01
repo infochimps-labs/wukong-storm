@@ -137,6 +137,11 @@ public class SubprocessFunction extends BaseFunction {
 	    LOG.error("Error writing to stdin of subprocess", e);
 	    startSubprocess();
 	    return false;
+	} catch (RuntimeError e) {
+	    collector.reportError(e);
+	    LOG.error(e);
+	    startSubprocess();
+	    return false;
 	}
     }
 

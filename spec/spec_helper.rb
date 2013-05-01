@@ -15,7 +15,19 @@ RSpec.configure do |config|
   end
 
   def storm_runner *args, &block
-    runner(Wukong::Storm::StormRunner, 'wu-storm', *args)
+    runner(Wukong::Storm::StormRunner, 'wu-storm', *args) do
+      stub!(:execute_command)
+      instance_eval(&block) if block_given?
+    end
   end
+
+  def wu_storm *args
+    command('wu-storm', *args)
+  end
+  
+  def wu_bolt *args
+    command('wu-bolt', *args)
+  end
+  
   
 end
