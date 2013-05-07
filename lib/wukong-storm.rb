@@ -44,6 +44,7 @@ module Wukong
         
         settings.define :nimbus_host,        wukong_storm: true, storm: true, description: 'nimbus.host'
         settings.define :nimbus_port,        wukong_storm: true, storm: true, description: 'nimbus.thrift.port'
+        settings.define :kafka_hosts,        wukong_storm: true, description: "Comma-separated list of Kafka hosts"
         settings.define :zookeeper_hosts,    wukong_storm: true, description: "Comma-separated list of Zookeeper hosts"
 
         settings.define :storm_home,         wukong_storm: true, description: "Path to Storm installation", env_var: "STORM_HOME", default: "/usr/lib/storm"
