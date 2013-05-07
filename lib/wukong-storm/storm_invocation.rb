@@ -53,7 +53,14 @@ module Wukong
       #
       # @return [String]
       def storm_runner
-        settings[:storm_runner] || File.join(settings[:storm_home], 'bin/storm')
+        explicit_runner = settings[:storm_runner]
+        home_runner     = File.join(settings[:storm_home], 'bin/storm')
+        default_runner  = 'storm'
+        case
+        when explicit_runner then explicit_runner
+        when File.exist?(home_runner) then home_runner
+        else default_runner
+        end
       end
 
       protected
