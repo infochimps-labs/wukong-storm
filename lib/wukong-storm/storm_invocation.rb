@@ -64,7 +64,7 @@ module Wukong
       #
       # @see #fully_qualified_class_name
       def wukong_topology_submitter_jar
-        File.expand_path("../../target/wukong-storm-1.3.1-SNAPSHOT-jar-with-dependencies.jar", File.dirname(__FILE__))
+        File.expand_path("wukong-storm.jar", File.dirname(__FILE__))
       end
 
       # The default Java Submitter class.
