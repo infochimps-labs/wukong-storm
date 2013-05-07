@@ -2,6 +2,7 @@ package com.infochimps.wukong.storm;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -28,6 +29,11 @@ public class WukongTopologyBuilder {
     }
 
     public StormTopology topology() {
+	LOG.info("Reading from Kafka topic <" + inputTopic() + "> with parallelism " + inputParallelism() + " starting from " + inputOffset() + " in batches of " + inputBatch());
+	LOG.info("Building topology <" + topologyName() + "> with parallelism " + dataflowParallelism() );
+	LOG.info("Will run command: " + Arrays.toString(subprocessArgs()));
+	LOG.info("Writing to Kafka topic <" + outputTopic() + ">");
+	
 	TridentTopology top = new TridentTopology();
 	top.newStream(prop(topologyName()), spout())
 	    .parallelismHint(inputParallelism())
@@ -56,14 +62,16 @@ public class WukongTopologyBuilder {
     }
     
     public Boolean valid() {
-	if (topologyName() == null) { return false; };
-	if (inputTopic()   == null) { return false; };
-	if (outputTopic()  == null) { return false; };
+	if (topologyName()    == null) { return false; };
+	if (inputTopic()      == null) { return false; };
+	if (outputTopic()     == null) { return false; };
+	if (subprocessArgs()  == null) { return false; };
+	if (subprocessArgs().length == 0) { return false; };
 	return true;
     }
 
     public static String usageArgs() {
-	return "-D " + TOPOLOGY_NAME + "=TOPOLOGY_NAME -D " + INPUT_TOPIC + "=INPUT_TOPIC -D " + OUTPUT_TOPIC + "=OUTPUT_TOPIC";
+	return "-D " + TOPOLOGY_NAME + "=TOPOLOGY_NAME -D " + INPUT_TOPIC + "=INPUT_TOPIC -D " + OUTPUT_TOPIC + "=OUTPUT_TOPIC -D " + COMMAND + "='command to run'";
     }
     
     private String prop(String key, String defaultValue) {
@@ -73,7 +81,10 @@ public class WukongTopologyBuilder {
 	return prop(key);
     }
 
-
+    private String prop(String key) {
+	return System.getProperty(key);
+    }
+    
     public static String KAFKA_HOSTS			= "wukong.kafka.hosts";
     public static String DEFAULT_KAFKA_HOSTS		= "localhost";
     public List<String> kafkaHosts() {
@@ -90,10 +101,6 @@ public class WukongTopologyBuilder {
 	return prop(ZOOKEEPER_HOSTS, DEFAULT_ZOOKEEPER_HOSTS);
     }
     
-    private String prop(String key) {
-	return System.getProperty(key);
-    }
-
     public static String TOPOLOGY_NAME                  = "wukong.topology";
     public String topologyName() {
 	return prop(TOPOLOGY_NAME);
@@ -112,7 +119,7 @@ public class WukongTopologyBuilder {
 
     public static String COMMAND			= "wukong.command";
     public String[] subprocessArgs() {
-	return prop(COMMAND).split(" +");
+	return prop(COMMAND, "").split(" +");
     }
     
     public static String DATAFLOW_PARALLELISM		= "wukong.parallelism";

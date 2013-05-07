@@ -108,14 +108,6 @@
     </dependency>
 
     <dependency>
-      <groupId>com.infochimps.wukong</groupId>
-      <artifactId>wukong-deploy</artifactId>
-      <version>1.0.0</version>
-      <scope>system</scope>
-      <systemPath>/p/i/wukong-deploy/target/wukong-deploy-1.0.0-SNAPSHOT.jar</systemPath>
-    </dependency>
-
-    <dependency>
       <groupId>com.infochimps</groupId>
       <artifactId>storm-util</artifactId>
       <version>1.3.1-SNAPSHOT</version>

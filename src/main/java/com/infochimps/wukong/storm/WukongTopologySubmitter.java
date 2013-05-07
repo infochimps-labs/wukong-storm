@@ -25,13 +25,35 @@ public class WukongTopologySubmitter {
     }
 
     public static void setPropertiesFromArgsBecauseStupidlyHard(String[] args) {
-	for (String arg : args) {
-	    if (arg.startsWith("-D")) {
-		String[] parts = arg.substring(2).split("=");
-		if (parts.length == 2) {
-		    System.setProperty(parts[0].trim(), parts[1].trim());
+	int numArgs      = args.length;
+	int argIndex     = 0;
+	boolean isOption = false;
+	while (argIndex < numArgs) {
+	    String arg = args[argIndex];
+	    if (isOption) {
+		setPropertyFromArgBecauseStupidlyHard(arg);
+		isOption = false;
+	    } else {
+		if (arg.matches("-D.+")) {
+		    setPropertyFromArgBecauseStupidlyHard(arg.substring(2));
+		} else if (arg.matches("-D")) {
+		    isOption = true;
+		} else {
+		    LOG.error("Malformed option: " + arg);
 		}
 	    }
+	    argIndex += 1;
+	}
+    }
+
+    private static void setPropertyFromArgBecauseStupidlyHard(String arg) {
+	String[] parts = arg.split("=");
+	if (parts.length >= 2) {
+	    String key   = parts[0];
+	    String value = arg.substring(key.length() + 1);
+	    System.setProperty(key, value);
+	} else {
+	    LOG.error("Invalid property: " + arg);
 	}
     }
 

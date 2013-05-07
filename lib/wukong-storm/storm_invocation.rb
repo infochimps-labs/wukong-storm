@@ -34,7 +34,7 @@ module Wukong
       #
       # @return [String]
       def storm_kill_commandline
-        "#{storm_runner} kill #{topology} #{storm_kill_options}"
+        "#{storm_runner} kill #{topology} #{storm_kill_options} > /dev/null 2>&1"
       end
 
       # Generates the commandline that will be used to launch wu-bolt
@@ -43,7 +43,7 @@ module Wukong
       # @return [String]
       def wu_bolt_commandline
         return settings[:bolt_command] if settings[:bolt_command]
-        [settings[:command_prefix], 'wu-bolt', dataflow, non_wukong_storm_params].compact.map(&:to_s).reject(&:empty?).join(' ')
+        [settings[:command_prefix], 'wu-bolt', dataflow, non_wukong_storm_params_string].compact.map(&:to_s).reject(&:empty?).join(' ')
       end
 
       # Return the path to the `storm` program.
@@ -138,13 +138,20 @@ module Wukong
         "-D#{option}=#{Shellwords.escape(value.to_s)}"
       end
 
+      # Parameters that should be passed onto subprocesses.
+      #
+      # @return [Configliere::Param]
+      def params_to_pass
+        settings
+      end
+
       # Return a String stripped of any `wu-storm`-specific params but
       # still including any other params.
       #
       # @return [String]
-      def non_wukong_storm_params
-        settings.reject do |param, val|
-          settings.definition_of(param, :wukong_storm)
+      def non_wukong_storm_params_string
+        params_to_pass.reject do |param, val|
+          params_to_pass.definition_of(param, :wukong_storm)
         end.map do |param, val|
           "--#{param}=#{Shellwords.escape(val.to_s)}"
         end.join(" ")

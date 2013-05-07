@@ -44,7 +44,6 @@ public class SubprocessFunction extends BaseFunction {
     public void prepare(Map conf, TridentOperationContext context) {
 	setupLog();
 	createBuilder();
-	startSubprocess();
     }
 
     @Override
@@ -81,10 +80,11 @@ public class SubprocessFunction extends BaseFunction {
 	return environment;
     }
     
-    private void startSubprocess() {
+    private void startSubprocess(TridentCollector collector) {
 	try {
 	    stopSubprocess();
-	    LOG.debug("Starting subprocess");
+	    LOG.info("In directory:    " + builder.directory());
+	    LOG.info("Running command: " + builder.command());
 	    subprocess = builder.start();
 	    stdin  = new OutputStreamWriter(subprocess.getOutputStream());
 	    stdout = new BufferedReader(new InputStreamReader(subprocess.getInputStream()));
@@ -92,13 +92,13 @@ public class SubprocessFunction extends BaseFunction {
 	    startStderrListener();
 	} catch (IOException e) {
 	    LOG.error(e);
+	    collector.reportError(e);
 	}
     }
 
     private void stopSubprocess() {
 	try {
 	    if (subprocess == null) { return; };
-	    LOG.debug("Stopping subprocess");
 	    stdin.close();
 	    stdout.close();
 	    stderr.close();
@@ -127,6 +127,11 @@ public class SubprocessFunction extends BaseFunction {
     }
     
     private Boolean sendThroughDataflow(TridentTuple tuple, TridentCollector collector) {
+	if (subprocess == null) startSubprocess(collector);
+
+	if (stdin == null) {
+	    return false;
+	}
 	try {
 	    stdin.write(tuple.getString(0));
 	    stdin.write("\n");
@@ -135,12 +140,12 @@ public class SubprocessFunction extends BaseFunction {
 	} catch (IOException e) {
 	    collector.reportError(e);
 	    LOG.error("Error writing to stdin of subprocess", e);
-	    startSubprocess();
+	    startSubprocess(collector);
 	    return false;
-	} catch (RuntimeError e) {
+	} catch (RuntimeException e) {
 	    collector.reportError(e);
 	    LOG.error(e);
-	    startSubprocess();
+	    startSubprocess(collector);
 	    return false;
 	}
     }

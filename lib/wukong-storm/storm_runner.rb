@@ -39,7 +39,10 @@ module Wukong
 
       def run
         log.info("Dry run:") if settings[:dry_run]
-        execute_command(storm_kill_commandline) if kill_first?
+        if kill_first?
+          log.debug("Killing topology <#{dataflow}>")
+          execute_command(storm_kill_commandline)
+        end
         execute_command!(storm_launch_commandline)
         raise Error.new("Failed to launch topology #{dataflow}!") unless $?.success?
       end
