@@ -35,10 +35,10 @@ module Wukong
         settings.define :output,             wukong_storm: true, description: "Kafka topic to write to"
         
         settings.define :debug,              wukong_storm: true, storm: true, description: 'topology.debug'
+        settings.define :optimize,           wukong_storm: true, storm: true, description: 'topology.optimize'
         settings.define :timeout,            wukong_storm: true, storm: true, description: 'topology.message.timeout.secs'
         settings.define :workers,            wukong_storm: true, storm: true, description: 'topology.workers'
         settings.define :worker_opts,        wukong_storm: true, storm: true, description: 'topology.worker.childopts'
-        settings.define :tasks,              wukong_storm: true, storm: true, description: 'topology.tasks'
         settings.define :ackers,             wukong_storm: true, storm: true, description: 'topology.acker.executors'
         settings.define :sample_rate,        wukong_storm: true, storm: true, description: 'topology.stats.sample.rate'
         

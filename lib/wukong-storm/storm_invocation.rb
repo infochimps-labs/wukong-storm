@@ -77,13 +77,13 @@ module Wukong
       # The default Java Submitter class.
       #
       # @see #fully_qualified_class_name
-      WUKONG_TOPOLOGY_SUBMITTER_CLASS = "com.infochimps.wukong.storm.WukongTopologySubmitter"
+      TOPOLOGY_SUBMITTER_CLASS = "com.infochimps.wukong.storm.TopologySubmitter"
 
       # Returns the fully qualified name of the Java submitter class.
       #
-      # @see WUKONG_TOPOLOGY_SUBMITTER_CLASS
+      # @see TOPOLOGY_SUBMITTER_CLASS
       def fully_qualified_class_name
-        WUKONG_TOPOLOGY_SUBMITTER_CLASS
+        TOPOLOGY_SUBMITTER_CLASS
       end
 
       # Return a String of Java options constructed from mapping the passed
