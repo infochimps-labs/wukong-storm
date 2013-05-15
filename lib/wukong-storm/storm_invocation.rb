@@ -10,8 +10,12 @@ module Wukong
       # and/or commandline args.
       #
       # @return [String] the name of the Storm topology
-      def topology
+      def topology_name
         settings[:name] || dataflow
+      end
+
+      def topology_arg
+        args.first
       end
 
       # Generates a commandline that can be used to launch a new Storm
@@ -34,7 +38,7 @@ module Wukong
       #
       # @return [String]
       def storm_kill_commandline
-        "#{storm_runner} kill #{topology} #{storm_kill_options} > /dev/null 2>&1"
+        "#{storm_runner} kill #{topology_name} #{storm_kill_options} > /dev/null 2>&1"
       end
 
       # Generates the commandline that will be used to launch wu-bolt
@@ -43,7 +47,7 @@ module Wukong
       # @return [String]
       def wu_bolt_commandline
         return settings[:bolt_command] if settings[:bolt_command]
-        [settings[:command_prefix], 'wu-bolt', dataflow, non_wukong_storm_params_string].compact.map(&:to_s).reject(&:empty?).join(' ')
+        [settings[:command_prefix], 'wu-bolt', topology_arg, non_wukong_storm_params_string].compact.map(&:to_s).reject(&:empty?).join(' ')
       end
 
       # Return the path to the `storm` program.
@@ -107,7 +111,7 @@ module Wukong
          ["wukong.kafka.hosts",       settings[:kafka_hosts]],
          ["wukong.zookeeper.hosts",   settings[:zookeeper_hosts]],
 
-         ["wukong.topology",          topology],
+         ["wukong.topology",          topology_name],
          ["wukong.directory",         Dir.pwd],
          ["wukong.command",           wu_bolt_commandline],
          ["wukong.parallelism",       settings[:parallelism]],
@@ -119,6 +123,7 @@ module Wukong
          ["wukong.input.parallelism", settings[:input_parallelism]],
          
          ["wukong.output.topic",      settings[:output]],
+         ["wukong.output.topic.field",settings[:output_field]],
         ].reject do |pair|
           key, value = pair
           value.nil? || value.to_s.strip.empty?

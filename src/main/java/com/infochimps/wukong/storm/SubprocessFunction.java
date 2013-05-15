@@ -42,7 +42,6 @@ public class SubprocessFunction extends BaseFunction {
 
     @Override
     public void prepare(Map conf, TridentOperationContext context) {
-	setupLog();
 	createBuilder();
     }
 
@@ -55,10 +54,6 @@ public class SubprocessFunction extends BaseFunction {
     public void execute(TridentTuple tuple, TridentCollector collector) {
 	if (!sendThroughDataflow(tuple, collector)) { return; };
 	collectOutputFromDataflow(collector);
-    }
-
-    private void setupLog() {
-	LOG.setLevel(Level.TRACE);
     }
 
     private void createBuilder() {
@@ -83,7 +78,7 @@ public class SubprocessFunction extends BaseFunction {
     private void startSubprocess(TridentCollector collector) {
 	try {
 	    stopSubprocess();
-	    LOG.info("In directory:    " + builder.directory());
+	    LOG.info("Starting in directory:    " + builder.directory());
 	    LOG.info("Running command: " + builder.command());
 	    subprocess = builder.start();
 	    stdin  = new OutputStreamWriter(subprocess.getOutputStream());
@@ -99,6 +94,7 @@ public class SubprocessFunction extends BaseFunction {
     private void stopSubprocess() {
 	try {
 	    if (subprocess == null) { return; };
+	    LOG.info("Stopping...");
 	    stdin.close();
 	    stdout.close();
 	    stderr.close();
@@ -114,7 +110,6 @@ public class SubprocessFunction extends BaseFunction {
 		String line;
 		try {
 		    while ((line = stderr.readLine()) != null) { LOG.debug(line); };
-		    LOG.trace("Waiting for subprocess to terminate...");
 		    int exitStatus = subprocess.waitFor();
 		    LOG.debug("Subprocess terminated unexpectedly with status " + exitStatus);
 		} catch (IOException e) {
@@ -133,7 +128,8 @@ public class SubprocessFunction extends BaseFunction {
 	    return false;
 	}
 	try {
-	    stdin.write(tuple.getString(0));
+	    String line = tuple.getString(0);
+	    stdin.write(line);
 	    stdin.write("\n");
 	    stdin.flush();
 	    return true;

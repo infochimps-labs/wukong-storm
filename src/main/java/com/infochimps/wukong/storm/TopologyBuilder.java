@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import backtype.storm.generated.StormTopology;
 import backtype.storm.tuple.Fields;
 
+import storm.trident.Stream;
 import storm.trident.TridentTopology;
 import storm.trident.spout.IOpaquePartitionedTridentSpout;
 
@@ -19,7 +20,7 @@ import storm.kafka.KafkaConfig;
 import storm.kafka.trident.TridentKafkaConfig;
 import storm.kafka.StringScheme;
 
-import com.infochimps.storm.trident.KafkaState;
+import com.infochimps.storm.trident.KafkaMultiTopic;
 
 public class TopologyBuilder {
     
@@ -29,31 +30,31 @@ public class TopologyBuilder {
     }
 
     public StormTopology topology() {
-	LOG.info("Reading from Kafka topic <" + inputTopic() + "> with parallelism " + inputParallelism() + " starting from offset " + inputOffset() + " in batches of " + inputBatch());
-	LOG.info("Building topology <" + topologyName() + "> with parallelism " + dataflowParallelism() );
-	LOG.info("Running command: " + subprocessCommand());
-	LOG.info("Writing to Kafka topic <" + outputTopic() + ">");
-
+	logTopologyInfo();
 	TridentTopology top = new TridentTopology();
+
+	Stream input = top.newStream(prop(topologyName()), spout())
+	    .parallelismHint(inputParallelism());
+
+	Stream scaledInput;
 	if (dataflowParallelism() > inputParallelism()) {
-	    top.newStream(prop(topologyName()), spout())
-		.parallelismHint(inputParallelism())
-		.shuffle()	// Add this shuffle
-		.each(new Fields("str"), new SubprocessFunction(subprocessDirectory(), subprocessEnvironment(), subprocessArgs()), new Fields("_wukong"))
-		.parallelismHint(dataflowParallelism())
-		.partitionPersist(state(), new Fields("_wukong"), new KafkaState.Updater());
+	    scaledInput = input.shuffle();
 	} else {
-	    top.newStream(prop(topologyName()), spout())
-		.parallelismHint(inputParallelism())
-		.each(new Fields("str"), new SubprocessFunction(subprocessDirectory(), subprocessEnvironment(), subprocessArgs()), new Fields("_wukong"))
-		.parallelismHint(dataflowParallelism())
-		.partitionPersist(state(), new Fields("_wukong"), new KafkaState.Updater());
+	    scaledInput = input;
 	}
+
+	Stream wukongOutput = scaledInput.each(new Fields("str"), new SubprocessFunction(subprocessDirectory(), subprocessEnvironment(), subprocessArgs()), new Fields("_wukong"))
+	    .parallelismHint(dataflowParallelism());
+
+	Stream output = wukongOutput.each(new Fields("_wukong"), new TopicExtractorFunction(outputTopic(), outputTopicField()), new Fields("_topic"));
+	
+	output.partitionPersist(state(), new Fields("_wukong","_topic"), new KafkaMultiTopic.Updater());
+	
 	return top.build();
     }
 
-    public KafkaState.Factory state() {
-	return new KafkaState.Factory(outputTopic(), zookeeperHosts());
+    public KafkaMultiTopic.Factory state() {
+	return new KafkaMultiTopic.Factory(outputTopic(), "_topic", "_wukong", zookeeperHosts());
     }
     
     public OpaqueTridentKafkaSpout spout() {
@@ -79,6 +80,12 @@ public class TopologyBuilder {
 
     public static String usageArgs() {
 	return "-D " + TOPOLOGY_NAME + "=TOPOLOGY_NAME -D " + INPUT_TOPIC + "=INPUT_TOPIC -D " + OUTPUT_TOPIC + "=OUTPUT_TOPIC -D " + COMMAND + "='command to run'";
+    }
+
+    private void logTopologyInfo() {
+	LOG.info("SPOUT: Reading from offset " + inputOffset() + " of Kafka topic <" + inputTopic() + "> in batches of " + inputBatch() + " with parallelism " + inputParallelism());
+	LOG.info("WUKONG: Launching topology <" + topologyName() + "> with parallelism " + dataflowParallelism() + " and command: " + subprocessCommand() );
+	LOG.info("STATE: Writing to Kafka topic <" + outputTopic() + "> (or the per-record value of the <" + outputTopicField() + ">-field, if defined)" );
     }
     
     private String prop(String key, String defaultValue) {
@@ -142,14 +149,14 @@ public class TopologyBuilder {
     public int dataflowParallelism() {
 	return Integer.parseInt(prop(DATAFLOW_PARALLELISM, Integer.toString(inputParallelism())));
     }
-    
+
     public static String INPUT_TOPIC			= "wukong.input.topic";
     public String inputTopic() {
 	return prop(INPUT_TOPIC);
     }
     
     public static String INPUT_OFFSET			= "wukong.input.offset";
-    public static String DEFAULT_INPUT_OFFSET		= "-2";
+    public static String DEFAULT_INPUT_OFFSET		= "-1";
     public int inputOffset() {
 	return Integer.parseInt(prop(INPUT_OFFSET, DEFAULT_INPUT_OFFSET));
     }
@@ -176,4 +183,11 @@ public class TopologyBuilder {
     public String outputTopic() {
 	return prop(OUTPUT_TOPIC);
     }
+
+    public static String OUTPUT_TOPIC_FIELD		= "wukong.output.topic.field";
+    public static String DEFAULT_OUTPUT_TOPIC_FIELD	= "_topic";
+    public String outputTopicField() {
+	return prop(OUTPUT_TOPIC_FIELD, DEFAULT_OUTPUT_TOPIC_FIELD);
+    }
+    
 }
