@@ -21,7 +21,7 @@ module Wukong
         settings.define :command_prefix,     wukong_storm: true, description: "Prefix to insert before all Wukong commands"
         settings.define :bolt_command,       wukong_storm: true, description: "Command-line to run within the spawned Storm bolt"
         settings.define :dry_run,            wukong_storm: true, description: "Echo commands that will be run, but don't run them", type: :boolean, default: false
-        settings.define :wait,               wukong_storm: true, description: "How many seconds to wait when killing a topology",  type: Integer, default: 1
+        settings.define :wait,               wukong_storm: true, description: "How many seconds to wait when killing a topology",  type: Integer, default: 300
         settings.define :rm,                 wukong_storm: true, description: "Will kill any running topology of the same name before launching", type: :boolean, default: false
         settings.define :delimiter,          wukong_storm: true, description: "Batch delimiter to use with wu-bolt"
         settings.define :parallelism,        wukong_storm: true, description: "Parallelism hint for wu-bolt"
