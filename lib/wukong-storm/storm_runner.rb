@@ -31,7 +31,11 @@ module Wukong
       end
 
       def validate
-        super()
+        begin
+          super()
+        rescue => e
+          raise Error.new("Must provide a processor or dataflow to run, via either the --run option or as the first argument, or provide an explicit --bolt_command") unless settings[:bolt_command]
+        end
         raise Error.new("An explicit --input topic is required to launch a dataflow") unless settings[:input]
         raise Error.new("An explicit --output topic is required to launch a dataflow") unless settings[:output]
         true
