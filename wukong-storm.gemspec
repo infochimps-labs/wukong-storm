@@ -19,4 +19,5 @@ EOF
   gem.require_paths = ['lib']
 
   gem.add_dependency('wukong', '3.0.1')
+  gem.add_dependency('kafka-rb')
 end
