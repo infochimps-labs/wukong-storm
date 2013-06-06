@@ -44,6 +44,8 @@ module Wukong
       end
 
       def run
+        log.info("Reading and writing to Kafka at <#{settings[:kafka_hosts]}>")
+        log.info("Reading and writing to Zookeeper at <#{settings[:zookeeper_hosts]}>")
         log.info("Dry run:") if settings[:dry_run]
         ensure_input_exists
         if kill_first?
