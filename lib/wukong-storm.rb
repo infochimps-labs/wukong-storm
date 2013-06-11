@@ -43,10 +43,10 @@ module Wukong
         settings.define :ackers,             wukong_storm: true, storm: true, description: 'topology.acker.executors'
         settings.define :sample_rate,        wukong_storm: true, storm: true, description: 'topology.stats.sample.rate'
         
-        settings.define :nimbus_host,        wukong_storm: true, storm: true, description: 'nimbus.host'
-        settings.define :nimbus_port,        wukong_storm: true, storm: true, description: 'nimbus.thrift.port'
-        settings.define :kafka_hosts,        wukong_storm: true, description: "Comma-separated list of Kafka hosts"
-        settings.define :zookeeper_hosts,    wukong_storm: true, description: "Comma-separated list of Zookeeper hosts"
+        settings.define :nimbus_host,        wukong_storm: true, storm: true, description: 'nimbus.host',                default: 'localhost'
+        settings.define :nimbus_port,        wukong_storm: true, storm: true, description: 'nimbus.thrift.port',         default: 6627
+        settings.define :kafka_hosts,        wukong_storm: true, description: "Comma-separated list of Kafka hosts",     default: 'localhost'
+        settings.define :zookeeper_hosts,    wukong_storm: true, description: "Comma-separated list of Zookeeper hosts", default: 'localhost'
 
         settings.define :storm_home,         wukong_storm: true, description: "Path to Storm installation", env_var: "STORM_HOME", default: "/usr/lib/storm"
         settings.define :storm_runner,       wukong_storm: true, description: "Path to Storm executable.  Use this for non-standard Storm installations"
