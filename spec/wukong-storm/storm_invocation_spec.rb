@@ -5,14 +5,14 @@ describe Wukong::Storm::StormInvocation do
   context "without any options" do
     subject { storm_runner('identity', '--input=foo', '--output=bar') }
 
-    its(:topology)                 { should == 'identity' }
+    its(:topology_name)                 { should == 'identity' }
 
     its(:storm_runner)             { should == '/usr/lib/storm/bin/storm' }
     
     its(:storm_launch_commandline) { should match(/jar .*storm.*.jar/)            }
     its(:storm_launch_commandline) { should match(/com\.infochimps\..*Submitter/) }
 
-    its(:storm_kill_commandline)   { should match(/storm kill identity -w 1/) }
+    its(:storm_kill_commandline)   { should match(/storm kill identity -w 300/) }
   end
 
   describe "Storm runner options" do
@@ -35,7 +35,7 @@ describe Wukong::Storm::StormInvocation do
     
     context "--name" do
       subject { storm_runner('identity', '--input=foo', '--output=bar', '--name=myFlow') }
-      its(:topology) { should == 'myFlow' }
+      its(:topology_name) { should == 'myFlow' }
     end
     
     context "--parallelism" do

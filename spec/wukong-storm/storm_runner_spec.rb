@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Wukong::Storm::StormRunner do
 
   describe "launching a new topology" do
-    it "raises an error without a dataflow to run" do
+    it "raises an error without a dataflow (or an explicit --bolt_command) to run" do
       expect { storm_runner('--input=foo', '--output=bar') }.to raise_error(Wukong::Error, /processor.*dataflow.*run/i)
     end
 
