@@ -33,7 +33,7 @@ public class TopologyBuilder {
 	logTopologyInfo();
 	TridentTopology top = new TridentTopology();
 
-	Stream input = top.newStream(prop(topologyName()), spout())
+	Stream input = top.newStream(topologyName(), spout())
 	    .parallelismHint(inputParallelism());
 
 	Stream scaledInput;
@@ -68,7 +68,7 @@ public class TopologyBuilder {
 	kafkaConfig.forceStartOffsetTime(inputOffset());
 	return kafkaConfig;
     }
-    
+
     public Boolean valid() {
 	if (topologyName()    == null) { return false; };
 	if (inputTopic()      == null) { return false; };
