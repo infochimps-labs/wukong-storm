@@ -19,8 +19,9 @@ import storm.kafka.trident.OpaqueTridentKafkaSpout;
 import storm.kafka.KafkaConfig;
 import storm.kafka.trident.TridentKafkaConfig;
 import storm.kafka.StringScheme;
+import backtype.storm.spout.SchemeAsMultiScheme;
 
-import com.infochimps.storm.trident.KafkaMultiTopic;
+import com.infochimps.storm.trident.KafkaState;
 
 public class TopologyBuilder {
     
@@ -48,13 +49,13 @@ public class TopologyBuilder {
 
 	Stream output = wukongOutput.each(new Fields("_wukong"), new TopicExtractorFunction(outputTopic(), outputTopicField()), new Fields("_topic"));
 	
-	output.partitionPersist(state(), new Fields("_wukong","_topic"), new KafkaMultiTopic.Updater());
+	output.partitionPersist(state(), new Fields("_wukong","_topic"), new KafkaState.Updater());
 	
 	return top.build();
     }
 
-    public KafkaMultiTopic.Factory state() {
-	return new KafkaMultiTopic.Factory(outputTopic(), "_topic", "_wukong", zookeeperHosts());
+    public KafkaState.Factory state() {
+	return new KafkaState.Factory(outputTopic(), zookeeperHosts());
     }
     
     public OpaqueTridentKafkaSpout spout() {
@@ -63,7 +64,7 @@ public class TopologyBuilder {
 
     private TridentKafkaConfig spoutConfig() {
 	TridentKafkaConfig kafkaConfig = new TridentKafkaConfig(KafkaConfig.StaticHosts.fromHostString(kafkaHosts(), inputPartitions()), inputTopic());
-	kafkaConfig.scheme = new StringScheme();
+	kafkaConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
 	kafkaConfig.fetchSizeBytes = inputBatch();
 	kafkaConfig.forceStartOffsetTime(inputOffset());
 	return kafkaConfig;
