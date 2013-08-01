@@ -15,7 +15,7 @@ module Wukong
       case program
       when 'wu-bolt'
         settings.define :run,                description: 'Name of the processor or dataflow to use. Defaults to basename of the given path', flag: 'r'
-        settings.define :delimiter,          description: 'Emitted as a single record to mark the end of the batch ', default: '---', flag: 't'
+        settings.define :delimiter,          description: 'Emitted as a single record to mark the end of the batch ', default: 'X', flag: 't'
       when 'wu-storm'
         settings.define :name,               wukong_storm: true, description: "Name for the launched topology"
         settings.define :command_prefix,     wukong_storm: true, description: "Prefix to insert before all Wukong commands"

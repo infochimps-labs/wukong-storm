@@ -113,6 +113,7 @@ module Wukong
 
          ["wukong.topology",          topology_name],
          ["wukong.directory",         Dir.pwd],
+         ["wukong.dataflow",          topology_arg],
          ["wukong.command",           wu_bolt_commandline],
          ["wukong.parallelism",       settings[:parallelism]],
          

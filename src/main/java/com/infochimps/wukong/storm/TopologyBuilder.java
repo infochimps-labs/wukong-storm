@@ -22,6 +22,7 @@ import storm.kafka.StringScheme;
 import backtype.storm.spout.SchemeAsMultiScheme;
 
 import com.infochimps.storm.trident.KafkaState;
+import com.infochimps.storm.wukong.WuFunction;
 
 public class TopologyBuilder {
     
@@ -44,12 +45,10 @@ public class TopologyBuilder {
 	    scaledInput = input;
 	}
 
-	Stream wukongOutput = scaledInput.each(new Fields("str"), new SubprocessFunction(subprocessDirectory(), subprocessEnvironment(), subprocessArgs()), new Fields("_wukong"))
+	Stream wukongOutput = scaledInput.each(new Fields("str"), dataflow(), new Fields("_wukong"))
 	    .parallelismHint(dataflowParallelism());
 
-	Stream output = wukongOutput.each(new Fields("_wukong"), new TopicExtractorFunction(outputTopic(), outputTopicField()), new Fields("_topic"));
-	
-	output.partitionPersist(state(), new Fields("_wukong","_topic"), new KafkaState.Updater());
+	wukongOutput.partitionPersist(state(), new Fields("_wukong"), new KafkaState.Updater());
 	
 	return top.build();
     }
@@ -70,23 +69,38 @@ public class TopologyBuilder {
 	return kafkaConfig;
     }
 
+    private WuFunction dataflow() {
+	return new WuFunction(dataflowName(), subprocessDirectory(), dataflowEnv());
+    }
+
     public Boolean valid() {
 	if (topologyName()    == null) { return false; };
+	if (dataflowName()    == null) { return false; };
 	if (inputTopic()      == null) { return false; };
 	if (outputTopic()     == null) { return false; };
-	if (subprocessArgs()  == null) { return false; };
-	if (subprocessArgs().length == 0) { return false; };
 	return true;
     }
 
     public static String usageArgs() {
-	return "-D " + TOPOLOGY_NAME + "=TOPOLOGY_NAME -D " + INPUT_TOPIC + "=INPUT_TOPIC -D " + OUTPUT_TOPIC + "=OUTPUT_TOPIC -D " + COMMAND + "='command to run'";
+	return "-D " + TOPOLOGY_NAME + "=TOPOLOGY_NAME -D " + DATAFLOW_NAME + "=DATAFLOW_NAME -D " + INPUT_TOPIC + "=INPUT_TOPIC -D " + OUTPUT_TOPIC + "=OUTPUT_TOPIC";
     }
 
     private void logTopologyInfo() {
+	logSpoutInfo();
+	logDataflowInfo();
+	logStateInfo();
+    }
+    
+    private void logSpoutInfo() {
 	LOG.info("SPOUT: Reading from offset " + inputOffset() + " of Kafka topic <" + inputTopic() + "> in batches of " + inputBatch() + " with parallelism " + inputParallelism());
-	LOG.info("WUKONG: Launching topology <" + topologyName() + "> with parallelism " + dataflowParallelism() + " and command: " + subprocessCommand() );
-	LOG.info("STATE: Writing to Kafka topic <" + outputTopic() + "> (or the per-record value of the <" + outputTopicField() + ">-field, if defined)" );
+    }
+
+    private void logDataflowInfo() {
+	LOG.info("WUKONG: Launching dataflow <" + dataflowName() + "> with parallelism " + dataflowParallelism() + " in environment <" + dataflowEnv() + ">" );
+    }
+
+    private void logStateInfo() {
+	LOG.info("STATE: Writing to Kafka topic <" + outputTopic() + ">");
     }
     
     private String prop(String key, String defaultValue) {
@@ -127,23 +141,15 @@ public class TopologyBuilder {
 	return prop(DATAFLOW_DIRECTORY, DEFAULT_DATAFLOW_DIRECTORY);
     }
 
-    public Map<String,String> subprocessEnvironment() {
-	// FIXME
-	return new HashMap();
+    public static String DATAFLOW_NAME			= "wukong.dataflow";
+    public String dataflowName() {
+	return prop(DATAFLOW_NAME);
     }
 
-    public static String COMMAND			= "wukong.command";
-    public String[] subprocessArgs() {
-	return prop(COMMAND, "").split(" +");
-    }
-
-    public String subprocessCommand() {
-	StringBuilder builder = new StringBuilder();
-	for (String arg : subprocessArgs()) {
-	    builder.append(arg);
-	    builder.append(" ");
-	}
-	return builder.toString();
+    public static String DATAFLOW_ENV			= "wukong.environment";
+    public static String DEFAULT_DATAFLOW_ENV	        = "development";
+    public String dataflowEnv() {
+	return prop(DATAFLOW_ENV, DEFAULT_DATAFLOW_ENV);
     }
     
     public static String DATAFLOW_PARALLELISM		= "wukong.parallelism";
