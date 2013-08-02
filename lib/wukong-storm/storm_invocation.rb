@@ -229,7 +229,7 @@ module Wukong
       # @return [String]
       def non_wukong_storm_params_string
         params_to_pass.reject do |param, val|
-          params_to_pass.definition_of(param, :wukong_storm)
+          (params_to_pass.definition_of(param, :wukong_storm) || params_to_pass.definition_of(param, :wukong))
         end.map do |param, val|
           "--#{param}=#{Shellwords.escape(val.to_s)}"
         end.join(" ")
