@@ -20,6 +20,10 @@ import storm.kafka.KafkaConfig;
 import storm.kafka.trident.TridentKafkaConfig;
 import storm.kafka.StringScheme;
 import backtype.storm.spout.SchemeAsMultiScheme;
+import storm.trident.operation.BaseFunction;
+import storm.trident.operation.TridentCollector;
+import backtype.storm.tuple.Values;
+import storm.trident.tuple.TridentTuple;
 
 import com.infochimps.storm.trident.KafkaState;
 import com.infochimps.storm.wukong.WuFunction;
@@ -30,6 +34,16 @@ import com.infochimps.storm.trident.spout.S3BlobStore;
 import com.infochimps.storm.trident.spout.FileBlobStore;
 
 public class TopologyBuilder {
+
+    private static class CombineMetadata extends BaseFunction {
+        @Override
+        public void execute(TridentTuple tuple, TridentCollector collector) {
+            String content = tuple.getString(0);
+            String metadata = tuple.getString(1);
+	    LOG.debug(String.format("%s\t%s", metadata, content));
+            collector.emit(new Values(String.format("%s\t%s", metadata, content)));
+        }
+    }
     
     static Logger LOG = Logger.getLogger(TopologyBuilder.class);
 
@@ -49,9 +63,16 @@ public class TopologyBuilder {
 	} else {
 	    scaledInput = input;
 	}
+	Stream wukongOutput;
 
-	Stream wukongOutput = scaledInput.each(new Fields(spoutTupleName()), dataflow(), new Fields("_wukong"))
+	if (spoutType().equals(BLOB_SPOUT_TYPE)) {
+	    Stream combinedInput = scaledInput.each(new Fields("metadata", "content"), new CombineMetadata(), new Fields("str"));
+	    wukongOutput  = combinedInput.each(new Fields("str"), dataflow(), new Fields("_wukong"))
 	    .parallelismHint(dataflowParallelism());
+	} else {
+	    wukongOutput = scaledInput.each(new Fields("str"), dataflow(), new Fields("_wukong"))
+		.parallelismHint(dataflowParallelism());
+	}
 
 	wukongOutput.partitionPersist(state(), new Fields("_wukong"), new KafkaState.Updater());
 	
@@ -67,14 +88,6 @@ public class TopologyBuilder {
 	    return new OpaqueTransactionalBlobSpout(blobStore(), new WukongRecordizer());
 	} else {
 	    return new OpaqueTridentKafkaSpout(kafkaSpoutConfig());
-	}
-    }
-
-    private String spoutTupleName() {
-	if (spoutType().equals(BLOB_SPOUT_TYPE)) {
-	    return "content";
-	} else { 
-	    return "str";	// kafka spout
 	}
     }
 
