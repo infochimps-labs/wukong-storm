@@ -149,7 +149,7 @@ module Wukong
       def s3_spout_options
         [
          ["wukong.input.blob.type",        "s3"],
-         ["wukong.input.blob.path",        input_uri.path],
+         ["wukong.input.blob.path",        input_uri.path.gsub(%r{^/},'')],
          ["wukong.input.blob.s3_bucket",   input_uri.host],
          ["wukong.input.blob.aws_key",     settings[:aws_key]],
          ["wukong.input.blob.aws_secret",  settings[:aws_secret]],
