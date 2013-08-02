@@ -84,7 +84,7 @@ public class TopologySubmitter {
     }
 
     public String usage() {
-	return "usage: storm jar " + fullyQualifiedClassPath() + " " + TopologyBuilder.usageArgs();
+	return "usage: storm jar " + fullyQualifiedClassPath() + " -DOPTION=VALUE ..." + TopologyBuilder.usageArgs();
     }
     
     public File fullyQualifiedClassPath() {

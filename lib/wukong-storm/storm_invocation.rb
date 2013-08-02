@@ -29,7 +29,7 @@ module Wukong
          "jar #{wukong_topology_submitter_jar}",
          fully_qualified_class_name,
          native_storm_options,
-         wukong_topology_options,
+         storm_topology_options,
         ].flatten.compact.join("\ \t\\\n ")
       end
 
@@ -103,32 +103,97 @@ module Wukong
       end
 
       # Return a String of Java options constructed from mapping the
-      # options specific to launching a Wukong topology.
+      # options specific to launching a Storm topology.
       #
       # @return [String]
-      def wukong_topology_options
+      def storm_topology_options
+        (services_options + topology_options + spout_options + dataflow_options + state_options).reject do |pair|
+          key, value = pair
+          value.nil? || value.to_s.strip.empty?
+        end.map { |pair|  java_option(*pair) }.sort
+      end
+
+      def services_options
         [
          ["wukong.kafka.hosts",       settings[:kafka_hosts]],
          ["wukong.zookeeper.hosts",   settings[:zookeeper_hosts]],
+        ]
+      end
 
+      def topology_options
+        [
          ["wukong.topology",          topology_name],
-         ["wukong.directory",         Dir.pwd],
-         ["wukong.dataflow",          topology_arg],
-         ["wukong.command",           wu_bolt_commandline],
-         ["wukong.parallelism",       settings[:parallelism]],
-         
-         ["wukong.input.topic",       settings[:input]],
+        ]
+      end
+
+      def spout_options
+        [
          ["wukong.input.offset",      settings[:input_offset]],
          ["wukong.input.partitions",  settings[:input_partitions]],
          ["wukong.input.batch",       settings[:input_batch]],
          ["wukong.input.parallelism", settings[:input_parallelism]],
-         
-         ["wukong.output.topic",      settings[:output]],
-         ["wukong.output.topic.field",settings[:output_field]],
-        ].reject do |pair|
-          key, value = pair
-          value.nil? || value.to_s.strip.empty?
-        end.map { |pair|  java_option(*pair) }
+        ].tap do |opts|
+          if blob_input?
+            opts << ["wukong.input.type", "blob"]
+            if s3_input?
+              opts.concat(s3_spout_options)
+            else
+              opts.concat(file_spout_options)
+            end
+          else
+            opts.concat(kafka_spout_options)
+          end
+        end
+      end
+
+      def s3_spout_options
+        [
+         ["wukong.input.blob.type",        "s3"],
+         ["wukong.input.blob.path",        input_uri.path],
+         ["wukong.input.blob.s3_bucket",   input_uri.host],
+         ["wukong.input.blob.aws_key",     settings[:aws_key]],
+         ["wukong.input.blob.aws_secret",  settings[:aws_secret]],
+        ]
+      end
+
+      def file_spout_options
+        [
+         ["wukong.input.blob.type", "file"],
+         ["wukong.input.blob.path", input_uri.path],
+        ]
+      end
+
+      def kafka_spout_options
+        [
+         ["wukong.input.kafka.topic", settings[:input]],
+        ]
+      end
+
+      def dataflow_options
+        [
+         ["wukong.directory",         Dir.pwd],
+         ["wukong.dataflow",          topology_arg],
+         ["wukong.command",           wu_bolt_commandline],
+         ["wukong.parallelism",       settings[:parallelism]],
+        ].tap do |opts|
+          opts << ["wukong.environment", settings[:environment]] if settings[:environment]
+        end
+      end
+
+      def state_options
+        if kafka_output?
+          kafka_state_options
+        end
+      end
+
+      def kafka_output?
+        true
+      end
+
+      def kafka_state_options
+        [
+         ["wukong.output.kafka.topic", settings[:output]],
+        ]
       end
 
       # Return a String of options used when attempting to kill a
@@ -168,6 +233,30 @@ module Wukong
         end.map do |param, val|
           "--#{param}=#{Shellwords.escape(val.to_s)}"
         end.join(" ")
+      end
+
+      def input_uri
+        @input_uri ||= URI.parse(settings[:input])
+      end
+
+      def output_uri
+        @output_uri ||= URI.parse(settings[:output])
+      end
+      
+      def blob_input?
+        s3_input? || file_input?
+      end
+
+      def kafka_input?
+        ! blob_input?
+      end
+
+      def s3_input?
+        input_uri.scheme == 's3'
+      end
+      
+      def file_input?
+        input_uri.scheme == 'file'
       end
       
     end

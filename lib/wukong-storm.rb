@@ -30,10 +30,9 @@ module Wukong
         settings.define :input_offset,       wukong_storm: true, description: "Offset to use when starting to read from input topic"
         settings.define :input_partitions,   wukong_storm: true, description: "Number of partitions to use for each input"
         settings.define :input_batch,        wukong_storm: true, description: "Batch size when reading from input"
-        settings.define :input_parallelism,  wukong_storm: true, description: "Parallelism when reading from input"
+        settings.define :input_parallelism,  wukong_storm: true, description: "Parallelism (number of simultaneous threads) reading input"
 
         settings.define :output,             wukong_storm: true, description: "Default Kafka output topic"
-        settings.define :output_field,       wukong_storm: true, description: "Field within JSON output records naming a per-record Kafka output topic"
         
         settings.define :debug,              wukong_storm: true, storm: true, description: 'topology.debug'
         settings.define :optimize,           wukong_storm: true, storm: true, description: 'topology.optimize'

@@ -47,7 +47,16 @@ module Wukong
         end
         raise Error.new("An explicit --input topic is required to launch a dataflow")  if settings[:input].nil?  || settings[:input].empty?
         raise Error.new("An explicit --output topic is required to launch a dataflow") if settings[:output].nil? || settings[:output].empty?
-        raise Error.new("Must provide a list of comma-separated Kafka hosts")          if settings[:kafka_hosts].nil? || settings[:kafka_hosts].empty?
+
+        if kafka_input?
+          raise Error.new("Must provide a list of comma-separated Kafka hosts")          if settings[:kafka_hosts].nil? || settings[:kafka_hosts].empty?
+        end
+        
+        if s3_input?
+          raise Error.new("Must provide an S3 bucket and path")                     if input_uri.path.nil?        || input_uri.path.empty?
+          raise Error.new("Must provide an AWS access key (settings[:aws_key])")    if settings[:aws_key].nil?    || settings[:aws_key].empty?
+          raise Error.new("Must provide an AWS secret key (settings[:aws_secret])") if settings[:aws_secret].nil? || settings[:aws_secret].empty?
+        end
         true
       end
 
@@ -55,7 +64,7 @@ module Wukong
         log.info("Reading and writing to Kafka at <#{settings[:kafka_hosts]}>")
         log.info("Reading and writing to Zookeeper at <#{settings[:zookeeper_hosts]}>")
         log.info("Dry run:") if settings[:dry_run]
-        ensure_input_exists
+        ensure_input_exists if kafka_input?
         if kill_first?
           log.debug("Killing topology <#{topology_name}>")
           execute_command(storm_kill_commandline)
