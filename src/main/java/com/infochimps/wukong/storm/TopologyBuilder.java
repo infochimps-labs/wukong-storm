@@ -211,7 +211,15 @@ public class TopologyBuilder {
     }
     
     private void logSpoutInfo() {
-	LOG.info("SPOUT: Reading from offset " + inputOffset() + " of Kafka topic <" + kafkaInputTopic() + "> in batches of " + inputBatchSize() + " with parallelism " + inputParallelism());
+	if (spoutType().equals(BLOB_SPOUT_TYPE)) {
+	    if (blobStoreType().equals(S3_BLOB_TYPE)) {
+		LOG.info("SPOUT: Reading from S3 bucket " + s3Bucket() + " with prefix " + blobStorePath() + ", key " + awsKey() + ", secret " + awsSecret());
+	    } else {
+		LOG.info("SPOUT: Reading from local file " + blobStorePath());
+	    }
+	} else {
+	    LOG.info("SPOUT: Reading from offset " + inputOffset() + " of Kafka topic <" + kafkaInputTopic() + "> in batches of " + inputBatchSize() + " with parallelism " + inputParallelism());
+	}
     }
 
     private void logDataflowInfo() {
