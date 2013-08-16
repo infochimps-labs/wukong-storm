@@ -38,10 +38,11 @@ public class TopologyBuilder {
     private static class CombineMetadata extends BaseFunction {
         @Override
         public void execute(TridentTuple tuple, TridentCollector collector) {
-            String content = tuple.getString(0);
-            String metadata = tuple.getString(1);
-	    LOG.debug(String.format("%s\t%s", metadata, content));
-            collector.emit(new Values(String.format("%s\t%s", metadata, content)));
+	    String  content    = tuple.getStringByField("content");
+            String  metadata   = tuple.getStringByField("metadata");
+            Integer lineNumber = tuple.getIntegerByField("linenumber");
+	    LOG.debug(String.format("%s\t%s\t%s", metadata, content, lineNumber));
+            collector.emit(new Values(String.format("%s\t%s\t%s", metadata, content, lineNumber)));
         }
     }
     
@@ -66,7 +67,7 @@ public class TopologyBuilder {
 	Stream wukongOutput;
 
 	if (spoutType().equals(BLOB_SPOUT_TYPE)) {
-	    Stream combinedInput = scaledInput.each(new Fields("metadata", "content"), new CombineMetadata(), new Fields("str"));
+	    Stream combinedInput = scaledInput.each(new Fields("content", "metadata", "linenumber"), new CombineMetadata(), new Fields("str"));
 	    wukongOutput  = combinedInput.each(new Fields("str"), dataflow(), new Fields("_wukong"))
 	    .parallelismHint(dataflowParallelism());
 	} else {
