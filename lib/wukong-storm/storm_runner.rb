@@ -13,23 +13,23 @@ module Wukong
       usage "DATAFLOW|PROCESSOR"
 
       description <<-EOF.gsub(/^ {8}/,'')
-        wu-storm is a commandline tool for controlling Storm
-        topologies created from Wukong dataflows.
+        wu-storm is a commandline tool for launching Storm topologies
+        built from Wukong dataflows.
 
-        Topologies can be launched from a dataflow or processor name
-        reading/writing to/from named Kafka topics:
+        The following would launch the `twitter_ingestor` Wukong
+        dataflow (or processor) as the Storm topology
+        `twitter_ingestor` reading from the Kafka topic
+        `twitter_stream` and writing to the Kafka topic
+        `database_writer`.
 
           $ wu-storm twitter_ingestor --input=twitter_stream --output=database_writer
 
-        If the --rm option is specified then the topology will be
-        killed first before being launched (useful for a restart).
+        Set the --nimubs_host, --kafka_hosts, and --zookeeper_hosts to
+        have Wukong storm find the right services.
 
-          $ wu-storm twitter_ingestor --input=twitter_stream --output=database_writer --rm
+        The following would launch the
 
-        Options exist for tuning
-          - scaling properties like workers, parallelism, &c.
-          - network locations of Storm, Kafka, and Zookeeper
-          - exactly what commands to run under the hood
+          $ wu-storm twitter_ingestor --input=s3://twitter_stream --output=database_writer
 
         For a complete list of options try `wu storm --help`.
       EOF
