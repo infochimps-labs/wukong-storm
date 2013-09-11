@@ -84,7 +84,7 @@ public class TopologySubmitter {
     }
 
     public String usage() {
-	return "usage: storm jar " + fullyQualifiedClassPath() + " -DOPTION=VALUE ..." + TopologyBuilder.usageArgs();
+	return "usage: storm jar " + fullyQualifiedClassPath() + " -DOPTION=VALUE ..." + TopologyBuilder.usage();
     }
     
     public File fullyQualifiedClassPath() {
@@ -104,6 +104,7 @@ public class TopologySubmitter {
 
     public void submit() {
 	try {
+	    builder.logInfo();
 	    StormSubmitter.submitTopology(builder.topologyName(), config, builder.topology());
 	} catch (AlreadyAliveException e) {
 	    LOG.error("Topology " + builder.topologyName() + " is already running", e);

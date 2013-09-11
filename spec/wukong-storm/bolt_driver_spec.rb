@@ -22,7 +22,7 @@ describe Wukong::Storm::BoltDriver do
   describe "driving a dataflow" do
     context "#receive_line hook from EventMachine" do
       let(:line) { "hello" }
-      before { $stdout.stub!(:write)     }
+      before { $stdout.stub(:write)     }
       after  { driver.receive_line(line) }
       it "passes the line to the #send_through_dataflow method" do
         driver.should_receive(:send_through_dataflow).with(line)
@@ -34,7 +34,7 @@ describe Wukong::Storm::BoltDriver do
         $stdout.should_receive(:write).with(line)
       end
       it "writes the batch delimiter" do
-        $stdout.should_receive(:write).with('---')
+        $stdout.should_receive(:write).with('X')
       end
       it "writes newlines after each output record and after the batch delimiter" do
         $stdout.should_receive(:write).with("\n").exactly(2).times

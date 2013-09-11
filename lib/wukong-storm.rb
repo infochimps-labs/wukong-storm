@@ -24,15 +24,24 @@ module Wukong
         settings.define :wait,               wukong_storm: true, description: "How many seconds to wait when killing a topology",  type: Integer, default: 300
         settings.define :rm,                 wukong_storm: true, description: "Will kill any running topology of the same name before launching", type: :boolean, default: false
         settings.define :delimiter,          wukong_storm: true, description: "Batch delimiter to use with wu-bolt"
-        settings.define :parallelism,        wukong_storm: true, description: "Parallelism hint for wu-bolt"
+        settings.define :parallelism,        wukong_storm: true, description: "Parallelism hint for wu-bolt", default: 1
 
-        settings.define :input,              wukong_storm: true, description: "Kafka input topic"
-        settings.define :input_offset,       wukong_storm: true, description: "Offset to use when starting to read from input topic"
-        settings.define :input_partitions,   wukong_storm: true, description: "Number of partitions to use for each input"
-        settings.define :input_batch,        wukong_storm: true, description: "Batch size when reading from input"
-        settings.define :input_parallelism,  wukong_storm: true, description: "Parallelism (number of simultaneous threads) reading input"
+        settings.define :input,              wukong_storm: true, description: "Input URI for the topology.  The scheme of the URI determines the type of spout."
+        settings.define :input_parallelism,  wukong_storm: true, description: "Parallelism (number of simultaneous threads) reading input.  Only used by some spouts.", default: 1
+        settings.define :offset,             wukong_storm: true, description: "Offset to use when starting to read from input.  Interpreted in a spout-dependent way."
 
-        settings.define :output,             wukong_storm: true, description: "Default Kafka output topic"
+        settings.define :from_beginning,     wukong_storm: true, description: "Start reading from the beginning of the input.", type: :boolean, default: false
+        settings.define :from_end,           wukong_storm: true, description: "Start reading from the end of the input.", type: :boolean, default: false
+        settings.define :resume,             wukong_storm: true, description: "Start reading from where the topology left off.  This is the default behavior.", type: :boolean, default: true
+        
+        settings.define :kafka_partitions,   wukong_storm: true, description: "Number of Kafka partitions on the input topic", default: 1
+        settings.define :kafka_batch,        wukong_storm: true, description: "Batch size when reading from input topic (bytes)", default: 1_048_576
+
+        settings.define :aws_key,            wukong_storm: true, description: "AWS access key. (Required for S3 input)"
+        settings.define :aws_secret,         wukong_storm: true, description: "AWS secret key. (Required for S3 input)"
+        settings.define :aws_region,         wukong_storm: true, description: "AWS region, one of: us-east-1, us-west-[1,2], eu-west-1, ap-southeast-[1,2], ap-northeast-1, sa-east-1.  (Required for S3 input)", default: 'us-east-1'
+        
+        settings.define :output,             wukong_storm: true, description: "Output URI for the topology.  The schee of the URI determines the type of state used."
         
         settings.define :debug,              wukong_storm: true, storm: true, description: 'topology.debug'
         settings.define :optimize,           wukong_storm: true, storm: true, description: 'topology.optimize'
