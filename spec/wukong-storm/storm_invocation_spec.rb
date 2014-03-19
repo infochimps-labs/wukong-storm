@@ -1,3 +1,4 @@
+require 'fileutils'
 require 'spec_helper'
 
 describe Wukong::Storm::StormInvocation do
@@ -16,7 +17,7 @@ describe Wukong::Storm::StormInvocation do
     its(:kafka_input?)                  { should be_true }
     its(:kafka_output?)                 { should be_true }
 
-    its(:storm_runner)             { should == '/usr/lib/storm/bin/storm' }
+    its(:storm_runner)             { should == 'storm' }
     
     its(:storm_launch_commandline) { should match(/jar .*storm.*.jar/)            }
     its(:storm_launch_commandline) { should match(/com\.infochimps\..*TopologySubmitter/) }
@@ -30,8 +31,15 @@ describe Wukong::Storm::StormInvocation do
       its(:storm_runner) { should == '/opt/bin/storm' }
     end
     context "--storm_home" do
-      subject { storm_runner('identity', '--input=foo', '--output=bar', '--storm_home=/usr/local/share/storm') }
-      its(:storm_runner) { should == '/usr/local/share/storm/bin/storm' }
+      around do |example|
+        FileUtils.mkdir_p File.join(pwd, 'bin')
+        FileUtils.touch   File.join(pwd, 'bin', 'storm')
+        example.run
+        FileUtils.rm_r    File.join(pwd, 'bin')
+      end
+      let(:pwd){ File.expand_path('../..', __FILE__) }
+      subject { storm_runner('identity', '--input=foo', '--output=bar', "--storm_home=#{pwd}") }
+      its(:storm_runner) { should == File.join(pwd, 'bin/storm') }
     end
   end
 
